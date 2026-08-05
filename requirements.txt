@@ -1,0 +1,62 @@
+# Project Aegis-Peru - Python Dependencies
+# Core Framework
+fastapi==0.109.0
+uvicorn[standard]==0.25.0
+python-multipart==0.0.6
+
+# Async Database
+asyncpg==0.29.0
+sqlalchemy[asyncio]==2.0.25
+alembic==1.13.1
+
+# Graph Database
+neo4j==5.15.0
+
+# Vector Database
+qdrant-client==1.7.0
+
+# Cache & Queue
+redis==5.0.1
+celery==5.3.6
+
+# Authentication & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-dotenv==1.0.0
+
+# Configuration
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# Logging
+structlog==23.3.0
+
+# Web Scraping
+playwright==1.40.0
+httpx[http2]==0.26.0
+beautifulsoup4==4.12.2
+lxml==4.9.4
+
+# Image Processing
+Pillow==10.1.0
+
+# AI/ML
+openai==1.6.1
+
+# Rate Limiting
+slowapi==0.1.9
+
+# Monitoring
+prometheus-client==0.19.0
+
+# Testing
+pytest==7.4.4
+pytest-asyncio==0.23.3
+pytest-cov==4.1.0
+httpx==0.26.0
+
+# Development
+black==23.12.1
+isort==5.13.2
+flake8==7.0.0
+mypy==1.8.0

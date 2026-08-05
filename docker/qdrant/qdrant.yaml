@@ -1,0 +1,14 @@
+storage:
+  storage_path: /qdrant/storage
+  snapshots_path: /qdrant/snapshots
+
+service:
+  http_port: 6333
+  grpc_port: 6334
+  max_request_size_mb: 50
+  max_workers: 4
+
+cluster:
+  enabled: false
+
+telemetry_disabled: true

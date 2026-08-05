@@ -1,0 +1,68 @@
+title: Aegis-Peru Worker IP Leakage Detection
+id: aegis-peru-worker-ip-leak
+status: experimental
+description: >
+  Detecta cuando un worker de Project Aegis-Peru realiza requests HTTP
+  sin pasar por el proxy Tor, exponiendo la IP real de la infraestructura.
+  Esto viola el principio de anonimato operacional del sistema.
+author: Aegis-Peru Security Team
+date: 2026/08/03
+logsource:
+  category: proxy
+  product: nginx
+  service: access
+  definition: 'Monitorear logs de proxy/salida de workers'
+detection:
+  selection_worker_requests:
+    - cs-method: 'GET'
+    - cs-method: 'POST'
+    - cs-method: 'HEAD'
+  selection_no_tor_proxy:
+    c-uri|contains:
+      - '.onion'
+      - 'check.torproject.org'
+      - 'haveibeenpwned.com'
+      - 'breachdirectory.org'
+      - 'intelx.io'
+      - 'e-consultaruc.sunat.gob.pe'
+      - 'sunedu.gob.pe'
+      - 'sunarp.gob.pe'
+  filter_tor_exit:
+    x-forwarded-for|cidr:
+      - '185.220.101.0/24'
+      - '104.244.72.0/21'
+  filter_internal:
+    c-ip|cidr:
+      - '172.20.0.0/16'
+      - '10.0.0.0/8'
+      - '127.0.0.1'
+  condition: selection_worker_requests and selection_no_tor_proxy and not filter_tor_exit and not filter_internal
+falsepositives:
+  - 'Actualizaciones de sistema via apt/yum (whitelist IPs conocidas)'
+  - 'Health checks internos'
+  - 'Descarga de modelos ML desde repositorios oficiales'
+level: critical
+tags:
+  - attack.defense_evasion
+  - attack.t1090.003
+  - aegis.anonymity.violation
+  - cia.confidentiality
+
+alert:
+  title: 'CRITICAL: Aegis Worker IP Leakage Detected'
+  severity: critical
+  description: |
+    Worker ID: {{source_ip}}
+    URL destino: {{destination_url}}
+    IP origen: {{source_ip}}
+    User-Agent: {{user_agent}}
+
+    ACCION REQUERIDA:
+    1. Aislar worker inmediatamente
+    2. Rotar credenciales de Tor
+    3. Verificar integridad del pipeline
+    4. Escalar a equipo de seguridad
+  actions:
+    - 'isolate_worker: {{source_ip}}'
+    - 'rotate_tor_credentials'
+    - 'notify_security_team'

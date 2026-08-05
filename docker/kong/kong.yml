@@ -1,0 +1,91 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: aegis-core
+    url: http://core:8000
+    routes:
+      - name: api-routes
+        paths:
+          - /api
+        strip_path: false
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+        protocols:
+          - https
+        https_redirect_status_code: 426
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 100
+          policy: redis
+          redis_host: redis
+          redis_password: ${REDIS_PASSWORD}
+          fault_tolerant: true
+          hide_client_headers: false
+      - name: jwt
+        config:
+          uri_param_names: []
+          cookie_names: []
+          key_claim_name: iss
+          secret_is_base64: false
+          claims_to_verify:
+            - exp
+      - name: cors
+        config:
+          origins:
+            - "https://aegis-peru.pnp.gob.pe"
+            - "https://localhost:3000"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+          headers:
+            - Authorization
+            - Content-Type
+            - X-Request-ID
+          max_age: 3600
+          credentials: true
+      - name: ip-restriction
+        config:
+          allow:
+            - 172.20.0.0/24
+            - 172.20.1.0/24
+            - 10.0.0.0/8
+            - 127.0.0.1
+
+  - name: aegis-admin
+    url: http://core:8000
+    routes:
+      - name: admin-routes
+        paths:
+          - /admin
+        strip_path: false
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 30
+          policy: redis
+          redis_host: redis
+          redis_password: ${REDIS_PASSWORD}
+      - name: jwt
+        config:
+          claims_to_verify:
+            - exp
+            - role
+      - name: ip-restriction
+        config:
+          allow:
+            - 10.0.0.0/8
+            - 127.0.0.1
+
+consumers:
+  - username: aegis-api-client
+    jwt_secrets:
+      - algorithm: HS256
+        key: aegis-jwt-key-2026
+        secret: ${JWT_SECRET}
